@@ -7,7 +7,7 @@
 
 #ifndef SYSCLOCK_CONFIG_H_
 #define SYSCLOCK_CONFIG_H_
-
-
+#include "stm32l1xx.h"
+void SetSysClock(void);
 
 #endif /* SYSCLOCK_CONFIG_H_ */
