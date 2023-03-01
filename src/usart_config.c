@@ -1,5 +1,7 @@
-#include <string.h>
 #include "usart_config.h"
+
+#include <string.h>
+
 #include "stm32l1xx.h"
 #include "utils.h"
 
@@ -24,7 +26,7 @@ void USART1_dma_init(void) {
      */
 
     // ref. manual p.260
-    RCC->AHBENR |= RCC_AHBENR_DMA1EN;         // DMA1 clock enable
+    RCC->AHBENR        |= RCC_AHBENR_DMA1EN;  // DMA1 clock enable
     DMA1_Channel5->CCR &= ~(DMA_CCR_DIR |     /*!< Data transfer direction 0 = p->m, 1 = m->p */
                             DMA_CCR_PINC |    /*!< Peripheral increment mode */
                             DMA_CCR_PSIZE |   /*!< PSIZE[1:0] bits (Peripheral size) 0 = 8-bits */
@@ -37,8 +39,8 @@ void USART1_dma_init(void) {
                            DMA_CCR_TCIE | /*!< Transfer complete interrupt enable */
                            DMA_CCR_MINC); /*!< Memory increment mode */
 
-    DMA1_Channel5->CPAR = (uint32_t) & (USART1->DR);            /*!< set peripheral address as USART1-DR */
-    DMA1_Channel5->CMAR = (uint32_t)usart1_rx_dma_buffer;       /*!< Set buffer address */
+    DMA1_Channel5->CPAR  = (uint32_t) & (USART1->DR); /*!< set peripheral address as USART1-DR */
+    DMA1_Channel5->CMAR  = (uint32_t)usart1_rx_dma_buffer;      /*!< Set buffer address */
     DMA1_Channel5->CNDTR = (uint16_t)USART1_RX_DMA_BUFFER_SIZE; /*!< Set data length */
 
     /* DMA interrupt init */
@@ -47,15 +49,21 @@ void USART1_dma_init(void) {
 
     /* USART configuration */
     // ref. manual p.247
-    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;              // set bit 14 (USART1 clock EN)
-    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;                 // enable GPIOA port clock bit 0 (GPIOA EN)
-    GPIOA->AFR[1] |= (0x07 << GPIO_AFRH_AFRH1_Pos);    // GPIOA_AFRH9 as AF7 0b111 = 0x07 p.188,AF7 p.177
-    GPIOA->AFR[1] |= (0x07 << GPIO_AFRH_AFRH2_Pos);    // GPIOA_AFRH10 as AF7 0b111 = 0x07 p.188,AF7 p.177
-    GPIOA->MODER |= (0x02 << GPIO_MODER_MODER9_Pos);   // MODER2=PA9(TX) to mode 0b10=alternate function mode. p184
-    GPIOA->MODER |= (0x02 << GPIO_MODER_MODER10_Pos);  // MODER3=PA10(RX) to mode 0b10=alternate function mode. p184
-    GPIOA->MODER |= (0x01 << GPIO_MODER_MODER7_Pos);   // PA7 as output mode 01=digital output
-    GPIOA->PUPDR |= (0x02 << GPIO_PUPDR_PUPDR7_Pos);   // set connect PA7 with pulldown 0b10=pulldown
-    GPIOA->ODR &= ~GPIO_ODR_ODR_7;                     // Disable TX and Enable RX
+    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;  // set bit 14 (USART1 clock EN)
+    RCC->AHBENR  |= RCC_AHBENR_GPIOAEN;    // enable GPIOA port clock bit 0 (GPIOA EN)
+    GPIOA->AFR[1] |=
+        (0x07 << GPIO_AFRH_AFRH1_Pos);  // GPIOA_AFRH9 as AF7 0b111 = 0x07 p.188,AF7 p.177
+    GPIOA->AFR[1] |=
+        (0x07 << GPIO_AFRH_AFRH2_Pos);  // GPIOA_AFRH10 as AF7 0b111 = 0x07 p.188,AF7 p.177
+    GPIOA->MODER |=
+        (0x02
+         << GPIO_MODER_MODER9_Pos);  // MODER2=PA9(TX) to mode 0b10=alternate function mode. p184
+    GPIOA->MODER |=
+        (0x02
+         << GPIO_MODER_MODER10_Pos);  // MODER3=PA10(RX) to mode 0b10=alternate function mode. p184
+    GPIOA->MODER |= (0x01 << GPIO_MODER_MODER7_Pos);  // PA7 as output mode 01=digital output
+    GPIOA->PUPDR |= (0x02 << GPIO_PUPDR_PUPDR7_Pos);  // set connect PA7 with pulldown 0b10=pulldown
+    GPIOA->ODR   &= ~GPIO_ODR_ODR_7;                  // Disable TX and Enable RX
 
     USART1->BRR = USART_BRR_VAL;      // 9600 BAUD and crystal 32MHz. p710, D05
     USART1->CR1 |= USART_CR1_TE;      // TE bit. p739-740. Enable transmit
@@ -68,23 +76,19 @@ void USART1_dma_init(void) {
     NVIC_EnableIRQ(USART1_IRQn);
 
     /* Enable USART and DMA */
-    DMA1_Channel5->CCR |= DMA_CCR_EN; /*!< Channel enable*/
-    USART1->CR1 |= USART_CR1_UE;      // UE bit. p739-740. Uart enable
+    DMA1_Channel5->CCR |= DMA_CCR_EN;    /*!< Channel enable*/
+    USART1->CR1        |= USART_CR1_UE;  // UE bit. p739-740. Uart enable
 }
 
 /**
  * \brief           Enable TX will disable ~RX
  */
-static inline void RS485_TX_Enable() {
-    GPIOA->ODR |= GPIO_ODR_ODR_7;
-}
+static inline void RS485_TX_Enable() { GPIOA->ODR |= GPIO_ODR_ODR_7; }
 
 /**
  * \brief           Disable TX will enable ~RX
  */
-static inline void RS485_TX_Disable() {
-    GPIOA->ODR &= ~GPIO_ODR_ODR_7;
-}
+static inline void RS485_TX_Disable() { GPIOA->ODR &= ~GPIO_ODR_ODR_7; }
 
 /**
  * \brief           Send a byte to USART1
@@ -125,7 +129,7 @@ void DMA1_Channel5_IRQHandler(void) {
  */
 void USART1_IRQHandler(void) {
     uint32_t status = USART1->SR;
-    uint8_t data;
+    uint8_t  data;
     /* Check for IDLE line interrupt */
     if (status & USART_SR_IDLE) {
         USART2_send_string("USART1 Idle-line interrupt!\r\n");
@@ -138,18 +142,16 @@ void USART1_IRQHandler(void) {
 /**
  * \brief           Reset USART1_rx buffer
  */
-void USART1_RX_Buffer_Reset(void) {
-    memset(usart1_rx_dma_buffer, 0, USART1_RX_DMA_BUFFER_SIZE);
-}
+void USART1_RX_Buffer_Reset(void) { memset(usart1_rx_dma_buffer, 0, USART1_RX_DMA_BUFFER_SIZE); }
 
 /**
  * \brief           Reload and re-enable DMA1_channel5
  */
 void DMA1_Channel15_Reload(void) {
     USART2_send_string("Reset DMA1_Channel5_CNDTR!\r\n");
-    DMA1_Channel5->CCR &= ~DMA_CCR_EN;                          /*!< Channel disable*/
+    DMA1_Channel5->CCR   &= ~DMA_CCR_EN;                        /*!< Channel disable*/
     DMA1_Channel5->CNDTR = (uint16_t)USART1_RX_DMA_BUFFER_SIZE; /*!< Set data length */
-    DMA1_Channel5->CCR |= DMA_CCR_EN;                           /*!< Channel enable*/
+    DMA1_Channel5->CCR   |= DMA_CCR_EN;                         /*!< Channel enable*/
 }
 
 /**
@@ -180,7 +182,7 @@ void USART2_dma_init(void) {
      */
 
     // ref. manual p.260
-    RCC->AHBENR |= RCC_AHBENR_DMA1EN;         // DMA1 clock enable
+    RCC->AHBENR        |= RCC_AHBENR_DMA1EN;  // DMA1 clock enable
     DMA1_Channel6->CCR &= ~(DMA_CCR_DIR |     /*!< Data transfer direction 0 = p->m, 1 = m->p */
                             DMA_CCR_PINC |    /*!< Peripheral increment mode */
                             DMA_CCR_PSIZE |   /*!< PSIZE[1:0] bits (Peripheral size) 0 = 8-bits */
@@ -193,8 +195,8 @@ void USART2_dma_init(void) {
                            DMA_CCR_TCIE | /*!< Transfer complete interrupt enable */
                            DMA_CCR_MINC); /*!< Memory increment mode */
 
-    DMA1_Channel6->CPAR = (uint32_t) & (USART2->DR);            /*!< set peripheral address as USART2-DR */
-    DMA1_Channel6->CMAR = (uint32_t)usart2_rx_dma_buffer;       /*!< Set buffer address */
+    DMA1_Channel6->CPAR  = (uint32_t) & (USART2->DR); /*!< set peripheral address as USART2-DR */
+    DMA1_Channel6->CMAR  = (uint32_t)usart2_rx_dma_buffer;      /*!< Set buffer address */
     DMA1_Channel6->CNDTR = (uint16_t)USART2_RX_DMA_BUFFER_SIZE; /*!< Set data length */
 
     /* DMA interrupt init */
@@ -203,12 +205,12 @@ void USART2_dma_init(void) {
 
     /* USART configuration */
     // ref. manual p.247
-    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;  // set bit 17 (USART2 EN)
-    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;     // enable GPIOA port clock bit 0 (GPIOA EN)
-    GPIOA->AFR[0] |= 0x00000700;           // GPIOx_AFRL p.188,AF7 p.177
-    GPIOA->AFR[0] |= 0x00007000;           // GPIOx_AFRL p.188,AF7 p.177
-    GPIOA->MODER |= 0x00000020;            // MODER2=PA2(TX) to mode 10=alternate function mode. p184
-    GPIOA->MODER |= 0x00000080;            // MODER3=PA3(RX) to mode 10=alternate function mode. p184
+    RCC->APB1ENR  |= RCC_APB1ENR_USART2EN;  // set bit 17 (USART2 EN)
+    RCC->AHBENR   |= RCC_AHBENR_GPIOAEN;    // enable GPIOA port clock bit 0 (GPIOA EN)
+    GPIOA->AFR[0] |= 0x00000700;            // GPIOx_AFRL p.188,AF7 p.177
+    GPIOA->AFR[0] |= 0x00007000;            // GPIOx_AFRL p.188,AF7 p.177
+    GPIOA->MODER  |= 0x00000020;  // MODER2=PA2(TX) to mode 10=alternate function mode. p184
+    GPIOA->MODER  |= 0x00000080;  // MODER3=PA3(RX) to mode 10=alternate function mode. p184
 
     USART2->BRR = USART_BRR_VAL;      // 9600 BAUD and crystal 32MHz. p710, D05
     USART2->CR1 |= USART_CR1_TE;      // TE bit. p739-740. Enable transmit
@@ -221,8 +223,8 @@ void USART2_dma_init(void) {
     NVIC_EnableIRQ(USART2_IRQn);
 
     /* Enable USART and DMA */
-    DMA1_Channel6->CCR |= DMA_CCR_EN; /*!< Channel enable*/
-    USART2->CR1 |= USART_CR1_UE;      // UE bit. p739-740. Uart enable
+    DMA1_Channel6->CCR |= DMA_CCR_EN;    /*!< Channel enable*/
+    USART2->CR1        |= USART_CR1_UE;  // UE bit. p739-740. Uart enable
 }
 
 /**
@@ -300,7 +302,7 @@ void DMA1_Channel6_IRQHandler(void) {
  */
 void USART2_IRQHandler(void) {
     uint32_t status = USART2->SR;
-    uint8_t data;
+    uint8_t  data;
     /* Check for IDLE line interrupt */
     if (status & USART_SR_IDLE) {
         USART2_send_string("USART2 Idle-line interrupt!\r\n");
@@ -313,16 +315,14 @@ void USART2_IRQHandler(void) {
 /**
  * \brief           Rest USART2 RX buffer
  */
-void USART2_RX_Buffer_Reset() {
-    memset(usart2_rx_dma_buffer, 0, USART2_RX_DMA_BUFFER_SIZE);
-}
+void USART2_RX_Buffer_Reset() { memset(usart2_rx_dma_buffer, 0, USART2_RX_DMA_BUFFER_SIZE); }
 
 /**
  * \brief           Reload and re-enable DMA1_channel5
  */
 void DMA1_Channel16_Reload() {
     USART2_send_string("Reset DMA1_Channel6_CNDTR!\r\n");
-    DMA1_Channel6->CCR &= ~DMA_CCR_EN;                          /*!< Channel disable*/
+    DMA1_Channel6->CCR   &= ~DMA_CCR_EN;                        /*!< Channel disable*/
     DMA1_Channel6->CNDTR = (uint16_t)USART2_RX_DMA_BUFFER_SIZE; /*!< Set data length */
-    DMA1_Channel6->CCR |= DMA_CCR_EN;                           /*!< Channel enable*/
+    DMA1_Channel6->CCR   |= DMA_CCR_EN;                         /*!< Channel enable*/
 }

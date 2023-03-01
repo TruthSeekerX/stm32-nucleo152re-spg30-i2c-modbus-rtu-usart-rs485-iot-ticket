@@ -1,9 +1,11 @@
 Standard: Cpp11
 BasedOnStyle: Google
 IndentWidth: 4
-ColumnLimit: 0
+# Language: C
+ColumnLimit: 100
 AccessModifierOffset: -4
 NamespaceIndentation: All
+AlignAfterOpenBracket: Align
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterEnum: false
@@ -19,3 +21,15 @@ BraceWrapping:
   BeforeElse: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+AlignConsecutiveAssignments:
+  Enabled: true
+  AlignCompound: true
+  PadOperators: true
+AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignOperands: Align
+# AlignTrailingComments: Always

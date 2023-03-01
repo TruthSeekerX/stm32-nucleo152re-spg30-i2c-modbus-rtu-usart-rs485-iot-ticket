@@ -11,7 +11,6 @@
  */
 void IWDG_init(void){
 	IWDG->KR = 0x5555;		/*!< Enable access to IWDG_PR and IWDG_RLR */
-
 	IWDG->PR |= 0x06;		/*!< Set prescaler to LSI(37KHz) / 256 = 6.918ms */
 	while(!(IWDG->SR & IWDG_SR_PVU)){}	/*!< Wait for prescaler update ready */
 

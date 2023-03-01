@@ -8,8 +8,8 @@
 
 void delay_us(const unsigned long delay) {
     unsigned long i = 0;
-    SysTick->LOAD = 32 - 1;  // 32 000 000 = 1s so 32 = 1 us
-    SysTick->VAL = 0;
+    SysTick->LOAD   = 32 - 1;  // 32 000 000 = 1s so 32 = 1 us
+    SysTick->VAL    = 0;
     // enable counter, use processor clock, M3 Generic User Guide p. 159
     SysTick->CTRL = 5;
 
@@ -23,8 +23,8 @@ void delay_us(const unsigned long delay) {
 
 void delay_ms(const unsigned long delay) {
     unsigned long i = 0;
-    SysTick->LOAD = 32000 - 1;  // 32 000 000 = 1s so 32 = 1 us
-    SysTick->VAL = 0;
+    SysTick->LOAD   = 32000 - 1;  // 32 000 000 = 1s so 32 = 1 us
+    SysTick->VAL    = 0;
     // enable counter, use processor clock, M3 Generic User Guide p. 159
     SysTick->CTRL = 5;
 

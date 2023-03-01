@@ -1,8 +1,9 @@
 #ifndef I2C_H
 #define I2C_H
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 #include "stm32l1xx.h"
+
 
 void I2C_Stop(void);
 void I2C_StartTransmission(const uint8_t address);

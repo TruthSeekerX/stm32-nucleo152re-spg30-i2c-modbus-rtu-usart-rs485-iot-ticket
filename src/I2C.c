@@ -1,7 +1,6 @@
-#include "I2C.h"
+#include "i2c.h"
 /**
  * \brief Generate a I2C Start signal S
- * \return no return
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
 static inline void I2C_Start(void) {
@@ -15,7 +14,6 @@ static inline void I2C_Start(void) {
 
 /**
  * \brief Generate a I2C Stop signal P
- * \return no return
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
 void I2C_Stop(void) {
@@ -24,7 +22,6 @@ void I2C_Stop(void) {
 
 /**
  * \brief Generate a I2C stop signal XCK
- * \return no return
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
 static inline void I2C_DisableACK(void) {
@@ -34,7 +31,6 @@ static inline void I2C_DisableACK(void) {
 /**
  * \brief Start IC2 Transmission
  * \param[in] address - I2C address of the sensor
- * \return no return
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
 void I2C_StartTransmission(const uint8_t address) {
@@ -52,7 +48,6 @@ void I2C_StartTransmission(const uint8_t address) {
  * \brief Send a IC2 Write Request
  * \param[in] length - The number of bytes in command
  * \param[in] command - The address of the command to be send
- * \return no return
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
 void I2C_WriteCommand(const size_t length, const uint8_t *command) {
@@ -66,7 +61,6 @@ void I2C_WriteCommand(const size_t length, const uint8_t *command) {
  * \brief Send a IC2 Write Request
  * \param[in] data_length - The number of bytes in data
  * \param[in] data - The address of the data to be send, ex. can be a command or actual data
- * \return no return
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
 void I2C_WriteData(const size_t data_length, const uint8_t *data) {
@@ -83,7 +77,6 @@ void I2C_WriteData(const size_t data_length, const uint8_t *data) {
  * \param[in] address - I2C address of the sensor
  * \param[in] data_length - The number of bytes in data (3 by default Data_MSB, Data_LSB, Data_CRC)
  * \param[out] data - The address where the returned data would be stored
- * \return no return
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
 void I2C_Read(const uint8_t address, const size_t data_length, uint8_t *data) {
