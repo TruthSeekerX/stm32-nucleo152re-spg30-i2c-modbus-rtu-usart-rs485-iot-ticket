@@ -164,17 +164,19 @@ void sgp30_SetBaseline(const uint16_t baseline_eco2, const uint16_t baseline_tvo
 
 /**
  * \brief Set humidity compensation for the air quality signals (CO2eq and TVOC) and sensor raw
- * signals (H2-signal and Ethanol_signal). \param[in] humidity - The absolute humidity of the
- * environment. \return none \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023 \details The 2 data
- * bytes represent humidity values as a fixed-point 8.8bit number with a minimum value of 0x0001
- * (=1/256 g/m3) and a maximum value of 0xFFFF (255 g/m3 + 255/256 g/m3). For instance, sending a
- * value of 0x0F80 corresponds to a humidity value of 16.50 g/m3(16 g/m3 + 128/256 g/m3). After
- * setting a new humidity value, this value will be used by the on-chip humidity compensation
- * algorithm until a new humidity value is set using the â€œSet_humidityâ€� command. Restarting the
- * sensor (power-on or soft reset) or sending a value of 0x0000 (= 0 g/m3) sets the humidity value
- * used for compensation to its default value (0x0B92 = 11.57 g/m3) until a new humidity value is
- * sent. Sending a humidity value of 0x0000 can therefore be used to turn off the humidity
- * compensation.
+ * signals (H2-signal and Ethanol_signal).
+ * \param[in] humidity - The absolute humidity of the environment.
+ * \return none
+ * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
+ * \details The 2 data bytes represent humidity values as a fixed-point 8.8bit number with a minimum
+ * value of 0x0001 (=1/256 g/m3) and a maximum value of 0xFFFF (255 g/m3 + 255/256 g/m3). For
+ * instance, sending a value of 0x0F80 corresponds to a humidity value of 16.50 g/m3(16 g/m3 +
+ * 128/256 g/m3). After setting a new humidity value, this value will be used by the on-chip
+ * humidity compensation algorithm until a new humidity value is set using the Set_humidity command.
+ * Restarting the sensor (power-on or soft reset) or sending a value of 0x0000 (= 0 g/m3) sets the
+ * humidity value used for compensation to its default value (0x0B92 = 11.57 g/m3) until a new
+ * humidity value is sent. Sending a humidity value of 0x0000 can therefore be used to turn off the
+ * humidity compensation.
  */
 void sgp30_SetHumidity(const uint16_t humidity) {
     uint8_t binary_data[3];
@@ -190,9 +192,11 @@ void sgp30_SetHumidity(const uint16_t humidity) {
 }
 
 /**
- * \brief The command â€œMeasure_testâ€� which is included for integration and production line
- * testing runs an on-chip self-test. \return SGP30_SUCCESS, SGP30_ERR_BAD_CRC \author siyuan xu,
- * e2101066@edu.vamk.fi, Jan.2023 \details In case of a successful self-test the sensor returns the
+ * \brief The command Measure_test which is included for integration and production line testing
+ * runs an on-chip self-test.
+ * \return SGP30_SUCCESS, SGP30_ERR_BAD_CRC
+ * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
+ * \details In case of a successful self-test the sensor returns the
  * fixed binary_data pattern 0xD400 (with correct CRC).
  */
 SGP30ERR sgp30_MeasureTest() {
@@ -215,8 +219,10 @@ SGP30ERR sgp30_MeasureTest() {
 
 /**
  * \brief The SGP30 features a versioning system for the available set of measurement commands and
- * on-chip algorithms. \param[out] sgp_data - The memory address where the date would be stored, 3
- * bytes. \return SGP30_SUCCESS, SGP30_ERR_BAD_CRC \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
+ * on-chip algorithms.
+ * \param[out] sgp_data - The memory address where the date would be stored, 3 bytes.
+ * \return SGP30_SUCCESS, SGP30_ERR_BAD_CRC
+ * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  * \details The sensor responds with 2 data bytes (MSB first) and 1 CRC byte.
  */
 SGP30ERR sgp30_GetFeatureSetVersion(sgp30_t *const sgp_data) {
@@ -241,11 +247,12 @@ SGP30ERR sgp30_GetFeatureSetVersion(sgp30_t *const sgp_data) {
 
 /**
  * \brief Returns the sensor raw signals which are used as inputs for the on-chip calibration and
- * baseline compensation algorithms. \param[out] sgp_data - The memory address where the date would
- * be stored, 6 bytes. \return SGP30_SUCCESS, SGP30_ERR_BAD_CRC \author siyuan xu,
- * e2101066@edu.vamk.fi, Jan.2023 \details The measurement to which the sensor responds with 2 data
- * bytes (MSB first) and 1 CRC byte. for 2 sensor raw signals in the order H2_signal (sout_H2) and
- * Ethanol_signal (sout_EthOH).
+ * baseline compensation algorithms.
+ * \param[out] sgp_data - The memory address where the date would be stored, 6 bytes.
+ * \return SGP30_SUCCESS, SGP30_ERR_BAD_CRC
+ * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
+ * \details The measurement to which the sensor responds with 2 data bytes (MSB first) and 1 CRC
+ * byte. for 2 sensor raw signals in the order H2_signal (sout_H2) and Ethanol_signal (sout_EthOH).
  */
 SGP30ERR sgp30_MeasureRawSignals(sgp30_t *const sgp_data) {
     uint8_t crc_h2 = 0, crc_ethanol = 0;
@@ -274,11 +281,13 @@ SGP30ERR sgp30_MeasureRawSignals(sgp30_t *const sgp_data) {
 
 /**
  * \brief The readout of the serial ID register can be used to identify the chip and verify the
- * presence of the sensor. \param[out] sgp_data - The memory address where the date would be stored,
- * 9 bytes. \return SGP30_SUCCESS, SGP30_ERR_BAD_CRC \author siyuan xu, e2101066@edu.vamk.fi,
- * Jan.2023 \details The get serial ID command returns 3 words, and every word is followed by an
- * 8-bit CRC checksum. Together the 3 words constitute a unique serial ID with a length of 48 bits.
- * The ID returned with this command are represented in the big endian (or MSB first) format.
+ * presence of the sensor.
+ * \param[out] sgp_data - The memory address where the date would be stored, 9 bytes.
+ * \return SGP30_SUCCESS, SGP30_ERR_BAD_CRC
+ * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
+ * \details The get serial ID command returns 3 words, and every word is followed by an 8-bit CRC
+ * checksum. Together the 3 words constitute a unique serial ID with a length of 48 bits. The ID
+ * returned with this command are represented in the big endian (or MSB first) format.
  */
 SGP30ERR sgp30_GetSerialId(sgp30_t *const sgp_data) {
     uint8_t crc = 0;

@@ -32,4 +32,5 @@ AlignConsecutiveAssignments:
 AlignConsecutiveBitFields: Consecutive
 AlignConsecutiveDeclarations: Consecutive
 AlignOperands: Align
+AlignEscapedNewlines: Left
 # AlignTrailingComments: Always
