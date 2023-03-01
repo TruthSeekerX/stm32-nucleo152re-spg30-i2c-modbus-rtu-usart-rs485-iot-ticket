@@ -62,6 +62,7 @@ sgp30_t sgp30_create() {
  * During initialization phase, returns fixed values of 400 ppm CO2eq and 0ppb TVOC.
  */
 SGP30ERR sgp30_InitAirQuality() {
+    I2C1_init();
     I2C_StartTransmission(SGP30_ADDR);
     I2C_WriteCommand(2, Init_air_quality);
     delay_ms(10);
