@@ -1,6 +1,8 @@
-#include <stdlib.h>
-#include "crc.h"
 #include "modbus_rtu.h"
+
+#include <stdlib.h>
+
+#include "crc.h"
 
 /**
  * \brief Create an modbus_rtu_t object
@@ -15,26 +17,26 @@ modbus_rtu_t modbus_rtu_create(void) {
 /**
  * \brief Run a modbus rtu request
  * \param[in] modbus_rtu_frame - Address + PDU + CRC, PDU = Function code + Data
- * \return MODBUS_RTU_ERR code
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
-MODBUS_RTU_ERR modbusRtu_RunRequest(const uint8_t *const modbus_rtu_frame) {
+void modbusRtu_RunRequest(const uint8_t *const modbus_rtu_frame, void *data) {
     MODBUS_RTU_ERR err;
-    uint8_t functionCode;
+    uint8_t        functionCode;
 
     err = modbusRtu_CrcCheck(modbus_rtu_frame);
     if (err == MODBUS_RTU_ERR_BAD_CRC) {
         debug_console("BAD CRC!\n\r");
-        modbusRtu_ErrorReply(modbus_rtu_frame, err);
-        return err;
+        modbusRtu_ErrorReply(modbus_rtu_frame, (uint8_t)err);
+        return;
     } else if (err == MODBUS_RTU_SUCCESS) {
         debug_console("CRC SUCCESS!\n\r");
         // Validate Function Code
         functionCode = modbus_rtu_frame[FUNCTION_CODE];
-        err = modbusRtu_FunctionCodeValidation(functionCode);
+        err          = modbusRtu_FunctionCodeValidation(functionCode);
         if (MODBUS_RTU_SUCCESS != err) {
             debug_console("BAD FUNCTION CODE!\n\r");
-            modbusRtu_ErrorReply(modbus_rtu_frame, err);
+            modbusRtu_ErrorReply(modbus_rtu_frame, (uint8_t)err);
+            return;
         } else {
             debug_console("FUNCTION CODE Accepted!\n\r");
             switch (modbus_rtu_frame[FUNCTION_CODE]) {
@@ -49,7 +51,7 @@ MODBUS_RTU_ERR modbusRtu_RunRequest(const uint8_t *const modbus_rtu_frame) {
                     break;
                 case READ_AI:
                     // TBD
-                    modbusRtu_ReadInputRegister(modbus_rtu_frame);
+                    err = modbusRtu_ReadInputRegister(modbus_rtu_frame, data);
                     break;
                 case WRITE_ONE_DO:
                     // TBD
@@ -59,6 +61,11 @@ MODBUS_RTU_ERR modbusRtu_RunRequest(const uint8_t *const modbus_rtu_frame) {
                     break;
                 default:
                     break;
+            }
+            if (MODBUS_RTU_SUCCESS != err) {
+                modbusRtu_ErrorReply(modbus_rtu_frame, (uint8_t)err);
+            } else {
+                debug_console("Modbus RTU request execution successful!\n\r");
             }
         }
     }
@@ -84,14 +91,15 @@ MODBUS_RTU_ERR modbusRtu_AddressValidation(const uint8_t address) {
  * \param[in] modbus_exception_code - MODBUS_RTU_ERR code
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
-void modbusRtu_ErrorReply(const uint8_t *const modbus_rtu_frame, const uint8_t modbus_exception_code) {
-    uint8_t modbus_reply_frame[MODBUS_FRAME_ERROR_REPLY_LENGTH];
-    uint16_t crc = 0;
-    modbus_reply_frame[SLAVE_ADDRESS] = modbus_rtu_frame[SLAVE_ADDRESS];
-    modbus_reply_frame[FUNCTION_CODE] = modbus_rtu_frame[FUNCTION_CODE] + 0x80;
-    modbus_reply_frame[ERROR_REPLY_DATA] = modbus_exception_code;
-    crc = CRC16(modbus_reply_frame, 3);
-    modbus_reply_frame[ERROR_REPLY_CHECKSUM_HI] = (uint8_t)(crc >> 8);
+void modbusRtu_ErrorReply(const uint8_t *const modbus_rtu_frame,
+				MODBUS_RTU_ERR        modbus_exception_code) {
+    uint8_t  modbus_reply_frame[MODBUS_FRAME_ERROR_REPLY_LENGTH];
+    uint16_t crc                                 = 0;
+    modbus_reply_frame[SLAVE_ADDRESS]            = modbus_rtu_frame[SLAVE_ADDRESS];
+    modbus_reply_frame[FUNCTION_CODE]            = modbus_rtu_frame[FUNCTION_CODE] + 0x80;
+    modbus_reply_frame[ERROR_REPLY_DATA]         = modbus_exception_code;
+    crc                                          = CRC16(modbus_reply_frame, 3);
+    modbus_reply_frame[ERROR_REPLY_CHECKSUM_HI]  = (uint8_t)(crc >> 8);
     modbus_reply_frame[ERROR_REPLY_CHECKSUM_LOW] = (uint8_t)(crc & 0xff);
     modbusRtu_SendData(modbus_reply_frame, MODBUS_FRAME_ERROR_REPLY_LENGTH);
 }
@@ -99,19 +107,19 @@ void modbusRtu_ErrorReply(const uint8_t *const modbus_rtu_frame, const uint8_t m
 /**
  * \brief Normal reply to Modbus RTU Master
  * \param[in] modbus_rtu_frame - Address + PDU + CRC, PDU = Function code + Data
- * \param[in] data - The address of the requested data (coil, discrete input, register...) 
+ * \param[in] data - The address of the requested data (coil, discrete input, register...)
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
 void modbusRtu_Reply(const uint8_t *const modbus_rtu_frame, const uint8_t *data) {
-    uint8_t modbus_reply_frame[MODBUS_FRAME_REPLY_LENGTH];
-    uint16_t crc = 0;
-    modbus_reply_frame[SLAVE_ADDRESS] = modbus_rtu_frame[SLAVE_ADDRESS];
-    modbus_reply_frame[FUNCTION_CODE] = modbus_rtu_frame[FUNCTION_CODE];
-    modbus_reply_frame[REPLY_BYTE_COUNT] = 2;
-    modbus_reply_frame[REPLY_DATA_HI] = data[0];
-    modbus_reply_frame[REPLY_DATA_LOW] = data[1];
-    crc = CRC16(modbus_reply_frame, 3);
-    modbus_reply_frame[REPLY_CHECKSUM_HI] = (uint8_t)(crc >> 8);
+    uint8_t  modbus_reply_frame[MODBUS_FRAME_REPLY_LENGTH];
+    uint16_t crc                           = 0;
+    modbus_reply_frame[SLAVE_ADDRESS]      = modbus_rtu_frame[SLAVE_ADDRESS];
+    modbus_reply_frame[FUNCTION_CODE]      = modbus_rtu_frame[FUNCTION_CODE];
+    modbus_reply_frame[REPLY_BYTE_COUNT]   = 2;
+    modbus_reply_frame[REPLY_DATA_HI]      = data[0];
+    modbus_reply_frame[REPLY_DATA_LOW]     = data[1];
+    crc                                    = CRC16(modbus_reply_frame, 3);
+    modbus_reply_frame[REPLY_CHECKSUM_HI]  = (uint8_t)(crc >> 8);
     modbus_reply_frame[REPLY_CHECKSUM_LOW] = (uint8_t)(crc & 0xff);
     modbusRtu_SendData(modbus_reply_frame, MODBUS_FRAME_REPLY_LENGTH);
 }
@@ -125,12 +133,13 @@ void modbusRtu_Reply(const uint8_t *const modbus_rtu_frame, const uint8_t *data)
 MODBUS_RTU_ERR modbusRtu_CrcCheck(const uint8_t *const modbus_rtu_frame) {
     uint16_t crc_checksum = 0;
     uint16_t crc_calcuate = 0;
-    char *crc_str[10];
+    char    *crc_str[10];
     crc_calcuate = CRC16(modbus_rtu_frame, 6);
     debug_console("CRC_CAL=");
     debug_console(itoa(crc_calcuate, crc_str, 10));
 
-    crc_checksum = ((uint16_t)modbus_rtu_frame[CHECKSUM_HI] << 8) | (uint16_t)modbus_rtu_frame[CHECKSUM_LOW];
+    crc_checksum =
+        ((uint16_t)modbus_rtu_frame[CHECKSUM_HI] << 8) | (uint16_t)modbus_rtu_frame[CHECKSUM_LOW];
 
     if (crc_calcuate != crc_checksum) {
         return MODBUS_RTU_ERR_BAD_CRC;

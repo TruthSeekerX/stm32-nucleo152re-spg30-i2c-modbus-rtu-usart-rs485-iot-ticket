@@ -1,6 +1,6 @@
 #ifndef SGP30_H
 #define SGP30_H
-
+#include <stdint.h>
 /* SGP30 I2C addresses */
 #define SGP30_ADDR (uint8_t)0x58
 

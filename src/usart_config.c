@@ -106,38 +106,38 @@ void USART1_write(const uint8_t data) {
 /**
  * \brief           DMA1 channel5 interrupt handler for USART1 RX
  */
-void DMA1_Channel5_IRQHandler(void) {
-    /* Check half-transfer complete interrupt */
-    if (DMA1->ISR & DMA_ISR_HTIF5) {
-        USART2_send_string("USART1 DMA half-transfer interrupt!\r\n");
-        DMA1->IFCR |= DMA_IFCR_CHTIF5; /*!< Channel 5 Half Transfer clear */
-    }
+// void DMA1_Channel5_IRQHandler(void) {
+//     /* Check half-transfer complete interrupt */
+//     if (DMA1->ISR & DMA_ISR_HTIF5) {
+//         USART2_send_string("USART1 DMA half-transfer interrupt!\r\n");
+//         DMA1->IFCR |= DMA_IFCR_CHTIF5; /*!< Channel 5 Half Transfer clear */
+//     }
 
-    /* Check transfer-complete interrupt */
-    if (DMA1->ISR & DMA_ISR_TCIF5) {
-        USART2_send_string("USART1 DMA transfer-complete interrupt!\r\n");
-        DMA1->IFCR |= DMA_IFCR_CTCIF5; /*!< Channel 5 Transfer Complete clear */
-        rs485_send_data(usart1_rx_dma_buffer, USART1_RX_DMA_BUFFER_SIZE);
-        //		USART2_send_data(usart1_rx_dma_buffer, USART1_RX_DMA_BUFFER_SIZE);
-        //		DMA1_Channel15_Reset();
-        //		USART1_RX_Buffer_Reset();
-    }
-}
+//     /* Check transfer-complete interrupt */
+//     if (DMA1->ISR & DMA_ISR_TCIF5) {
+//         USART2_send_string("USART1 DMA transfer-complete interrupt!\r\n");
+//         DMA1->IFCR |= DMA_IFCR_CTCIF5; /*!< Channel 5 Transfer Complete clear */
+//         rs485_send_data(usart1_rx_dma_buffer, USART1_RX_DMA_BUFFER_SIZE);
+//         //		USART2_send_data(usart1_rx_dma_buffer, USART1_RX_DMA_BUFFER_SIZE);
+//         //		DMA1_Channel15_Reset();
+//         //		USART1_RX_Buffer_Reset();
+//     }
+// }
 
 /**
  * \brief           USART1 global interrupt handler
  */
-void USART1_IRQHandler(void) {
-    uint32_t status = USART1->SR;
-    uint8_t  data;
-    /* Check for IDLE line interrupt */
-    if (status & USART_SR_IDLE) {
-        USART2_send_string("USART1 Idle-line interrupt!\r\n");
-        data = USART1->DR; /* Clear IDLE line flag */
-        DMA1_Channel15_Reload();
-        USART1_RX_Buffer_Reset();
-    }
-}
+// void USART1_IRQHandler(void) {
+//     uint32_t status = USART1->SR;
+//     uint8_t  data;
+//     /* Check for IDLE line interrupt */
+//     if (status & USART_SR_IDLE) {
+//         USART2_send_string("USART1 Idle-line interrupt!\r\n");
+//         data = USART1->DR; /* Clear IDLE line flag */
+//         DMA1_Channel15_Reload();
+//         USART1_RX_Buffer_Reset();
+//     }
+// }
 
 /**
  * \brief           Reset USART1_rx buffer

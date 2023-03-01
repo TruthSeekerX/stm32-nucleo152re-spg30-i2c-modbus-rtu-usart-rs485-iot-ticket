@@ -33,7 +33,7 @@ uint8_t CRC8(const uint8_t *data, const size_t length, const uint8_t polynomial,
  * \return wCRCWord - the remainder of the CRC-16 calculation
  * \author Jani Ahvonen found from somewhere, Jan.2023
  */
-uint16_t CRC16(const char *nData, uint16_t wLength) {
+uint16_t CRC16(const uint8_t *nData, uint16_t wLength) {
     static const uint16_t wCRCTable[] = {
         0X0000, 0XC0C1, 0XC181, 0X0140, 0XC301, 0X03C0, 0X0280, 0XC241, 0XC601, 0X06C0, 0X0780,
         0XC741, 0X0500, 0XC5C1, 0XC481, 0X0440, 0XCC01, 0X0CC0, 0X0D80, 0XCD41, 0X0F00, 0XCFC1,

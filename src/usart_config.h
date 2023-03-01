@@ -9,6 +9,7 @@
 #define USART_CONFIG_H_
 
 #include <stddef.h>
+#include <stdint.h>
 
 #define F_CPU                     32000000UL
 #define BAUDRATE                  9600U
