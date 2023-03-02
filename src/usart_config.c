@@ -276,43 +276,6 @@ char USART2_read() {
 }
 
 /**
- * \brief           DMA1 channel6 interrupt handler for USART2 RX
- */
-void DMA1_Channel6_IRQHandler(void) {
-    /* Check half-transfer complete interrupt */
-    if (DMA1->ISR & DMA_ISR_HTIF6) {
-        USART2_send_string("USART2 DMA half-transfer interrupt!\r\n");
-        DMA1->IFCR |= DMA_IFCR_CHTIF6; /*!< Channel 6 Half Transfer clear */
-
-        USART2_send_data(usart2_rx_dma_buffer, USART2_RX_DMA_BUFFER_SIZE);
-    }
-
-    /* Check transfer-complete interrupt */
-    if (DMA1->ISR & DMA_ISR_TCIF6) {
-        USART2_send_string("USART2 DMA transfer-complete interrupt!\r\n");
-        DMA1->IFCR |= DMA_IFCR_CTCIF6; /*!< Channel 6 Transfer Complete clear */
-        USART2_send_data(usart2_rx_dma_buffer, USART2_RX_DMA_BUFFER_SIZE);
-    }
-
-    /* Implement other events when needed */
-}
-
-/**
- * \brief           USART2 global interrupt handler
- */
-void USART2_IRQHandler(void) {
-    uint32_t status = USART2->SR;
-    uint8_t  data;
-    /* Check for IDLE line interrupt */
-    if (status & USART_SR_IDLE) {
-        USART2_send_string("USART2 Idle-line interrupt!\r\n");
-        data = USART2->DR; /* Clear IDLE line flag */
-        USART2_send_data(usart2_rx_dma_buffer, USART2_RX_DMA_BUFFER_SIZE);
-        DMA1_Channel16_Reload();
-    }
-}
-
-/**
  * \brief           Rest USART2 RX buffer
  */
 void USART2_RX_Buffer_Reset() { memset(usart2_rx_dma_buffer, 0, USART2_RX_DMA_BUFFER_SIZE); }
