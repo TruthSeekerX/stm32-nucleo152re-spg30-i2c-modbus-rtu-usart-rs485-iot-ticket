@@ -1,6 +1,5 @@
 # stm32-nucleo152re-spg30-i2c-modbus-rtu-usart-rs485-iot-ticket
-
-This is a project for the third-year course IITS2107-3004 Embedded Systems Design at Vaasa University of Applied Science 2023. This project is meant to get familiar with the full stack of IIOT(Industrial Internet of Things) development. 
+This is a project for the third-year course IITS2107-3004 Embedded Systems Design at Vaasa University of Applied Science 2023. This project is meant to get familiar with the full stack of IIOT(Industrial Internet of Things) development. In this project a digital air quality sensor was used to measure eCO2 and tVOC values. A Nucleo-l152re microcontroller development board was used as a Modbus slave to collect the measurement. A Modbus master device (PC) was polling the data from Modbus client and push the data to the cloud - Wapice IoT-TICKET. 
 
 # Objectives
 
@@ -10,21 +9,29 @@ This is a project for the third-year course IITS2107-3004 Embedded Systems Desig
 * Communication protocol MODBUS RTU
 * Communication error handling - CRC, parity
 * Wapice IoT-Ticket
+* RTFM - Read the fine manual/datasheet
 
 ![Block diagram](./docs/images/block-diagram.png)<br>
 
-# Equipment/Tools
+# Equipment, Tools and Technology
 
 * A PC with Windows 10 22H2 used, but GNU/Linux PC might be even better
-* Atollic True Studio for STM32 9.3.0
 * A STM32 Nucleo-l152re development board
 * USB2.0 Type-A to Mini-B cable (for connecting and programming Nucleo board from PC)
-* seeedstudio Grove SGP30 VOC and eCO2 Gas Sensor
-* FTDI USB-RS485-WE-1800-BT usb to rs485 adapter cable
-* MAX3485 RS-485 Transceiver
+* Embedded C/C++ 
+* Python 3.11.0
+* Github
+* Atollic True Studio for STM32 9.3.0
+* Microsoft Visual Studio Code
+* Wapice IoT-TICKET
+* Keysight Oscilloscope
 * Breadboard and connection wires
+* Seeedstudio Grove SGP30 VOC and eCO2 Gas Sensor x 1
+* FTDI USB-RS485-WE-1800-BT usb to rs485 adapter cable x 1
+* MAX3485 RS-485 Transceiver x 1
 * 10k resisters x 2
 * 100nF capacitor x 1
+
 
 # Microcontroller
 
@@ -97,7 +104,7 @@ Nuleo-l152re is a development board designed on Ultra-low-power platform STM32L1
 * On-board debugger and programmer ST-LINK/V2-1
 * Direct Memory Access (DMA)
 
-![Nucleo-l152re block diagram](./docs/images/nucleol152re_um_hardware-block-diagram.jpg "Nucleo-l152re block diagram")
+![Nucleo-l152re block diagram](./docs/images/nucleol152re_um_hardware-block-diagram.jpg "Nucleo-l152re block diagram")<br>
 ![Nucleo-l152re top layout](./docs/images/nucleol152re_um_top-layout.jpg "Nucleo-l152re top layout")
-![Nucleo-l152re bottom layout](./docs/images/nucleol152re_um_bottom-layout.jpg "Nucleo-l152re bottom layout")
+![Nucleo-l152re bottom layout](./docs/images/nucleol152re_um_bottom-layout.jpg "Nucleo-l152re bottom layout")<br>
 
