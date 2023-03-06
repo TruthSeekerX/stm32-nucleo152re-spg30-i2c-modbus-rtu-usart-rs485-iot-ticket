@@ -33,9 +33,9 @@ uint16_t rFlag = 0;  // Modbus RTU register flag
 #define RFLAG_FEATURE_SET (uint16_t)0x40
 #define RFLAG_SERIAL_ID   (uint16_t)0x80
 
-uint8_t u1tcFlag = 0;  // USART1 Transmite complete flag
-#define TRUE  (uint8_t)1
-#define FALSE (uint8_t)0
+int32_t u1tcFlag = 0;  // USART1 Transmite complete flag
+#define TRUE  (int32_t)1
+#define FALSE (int32_t)0
 
 /* Private macro */
 #define ARRAY_LEN(x) (sizeof(x) / sizeof((x)[0]))
@@ -46,11 +46,10 @@ char    usart2_rx_dma_buffer[USART2_RX_DMA_BUFFER_SIZE];
 sgp30_t sgp_data;
 
 /* Private function prototypes */
-void           debug_console(const char *message);
-void           modbusRtu_SendData(const uint8_t *const data, const size_t data_length);
-MODBUS_RTU_ERR modbusRtu_ReadInputRegister(const uint8_t *const modbus_rtu_frame, void *data,
-                                           uint8_t *reply_data, uint8_t *reply_data_len);
-
+void               modbusRtu_SendData(const uint8_t *const data, const size_t data_length);
+MODBUS_RTU_ERR     modbusRtu_ReadInputRegister(const uint8_t *const modbus_rtu_frame, void *data,
+                                               uint8_t *reply_data, uint8_t *reply_data_len);
+static inline void LED2_init(void);
 /**
 **===========================================================================
 **
@@ -70,15 +69,14 @@ int main(void) {
     USART2_dma_init();
     I2C1_init();
     IWDG_init();
+    LED2_init();
     sgp_data = sgp30_create();
 
-    RCC->AHBENR  |= 1;      // GPIOA ABH bus clock ON. p154
-    GPIOA->MODER |= 0x400;  // GPIOA pin 5 to output. p184
-    GPIOA->ODR   ^= 0x20;
-
-    char     debug_msg[DBUG_MSG_LEN];
+    int32_t  sgp30IsOnline      = FALSE;
     uint32_t setBaselineCounter = 0u;
+
 #if (DEBUG_CONSOLE_EN > 0u)
+    char debug_msg[DBUG_MSG_LEN];
     debug_console("App started...\n\r");
 #endif
     if (SGP30_SUCCESS != sgp30_GetSerialId(&sgp_data)) {
@@ -87,7 +85,8 @@ int main(void) {
         debug_console("Error! sgp30_GetSerialId failed!\n\r");
 #endif
     } else {
-        rFlag |= RFLAG_SERIAL_ID;
+        sgp30IsOnline = TRUE;
+        rFlag         |= RFLAG_SERIAL_ID;
 #if (DEBUG_CONSOLE_EN > 0u)
         debug_console("sgp30_GetSerialId success!\n\r");
         snprintf(debug_msg, DBUG_MSG_LEN, "Serial ID:%#llx\n\r", sgp_data.serialID);
@@ -95,18 +94,20 @@ int main(void) {
 #endif
     }
 
-    if (SGP30_SUCCESS != sgp30_GetFeatureSetVersion(&sgp_data)) {
-        rFlag &= RFLAG_FEATURE_SET;
+    if (sgp30IsOnline) {
+        if (SGP30_SUCCESS != sgp30_GetFeatureSetVersion(&sgp_data)) {
+            rFlag &= RFLAG_FEATURE_SET;
 #if (DEBUG_CONSOLE_EN > 0u)
-        debug_console("Error! spg30_GetFeatureSetVersion failed!\n\r");
+            debug_console("Error! spg30_GetFeatureSetVersion failed!\n\r");
 #endif
-    } else {
-        rFlag |= RFLAG_FEATURE_SET;
+        } else {
+            rFlag |= RFLAG_FEATURE_SET;
 #if (DEBUG_CONSOLE_EN > 0u)
-        debug_console("spg30_GetFeatureSetVersion success!\n\r");
-        snprintf(debug_msg, DBUG_MSG_LEN, "Feature set:%#x\n\r", sgp_data.featureSetVersion);
-        debug_console(debug_msg);
+            debug_console("spg30_GetFeatureSetVersion success!\n\r");
+            snprintf(debug_msg, DBUG_MSG_LEN, "Feature set:%#x\n\r", sgp_data.featureSetVersion);
+            debug_console(debug_msg);
 #endif
+        }
     }
 
     sgp30_InitAirQuality();
@@ -120,41 +121,47 @@ int main(void) {
 
         setBaselineCounter++;
 
-        // According to datasheet, SGP30 baseline values need to be set at about 1 hour interval
-        if (setBaselineCounter >= 3600U) {
-            if (SGP30_SUCCESS != spg30_GetBaseLine(&sgp_data)) {
-                rFlag &= (RFLAG_BASE_CO2 | RFLAG_BASE_TVOC);
+        if (sgp30IsOnline) {
+            // According to datasheet, SGP30 baseline values need to be set at about 1 hour interval
+            if (setBaselineCounter >= 3600U) {
+                if (SGP30_SUCCESS != spg30_GetBaseLine(&sgp_data)) {
 #if (DEBUG_CONSOLE_EN > 0u)
-                debug_console("Error! spg30_GetBaseline failed!\n\r");
+                    debug_console("Error! spg30_GetBaseline failed!\n\r");
+#endif
+                    rFlag &= (RFLAG_BASE_CO2 | RFLAG_BASE_TVOC);
+                } else {
+#if (DEBUG_CONSOLE_EN > 0u)
+                    debug_console("spg30_GetBaseline success!\n\r");
+                    snprintf(debug_msg, DBUG_MSG_LEN, "baselineCO2:%uppm, baselineTVOC:%uppb\n\r",
+                             sgp_data.baselineCO2, sgp_data.baselineTVOC);
+                    debug_console(debug_msg);
+#endif
+                    rFlag |= (RFLAG_BASE_CO2 | RFLAG_BASE_TVOC);
+                    sgp30_SetBaseline(sgp_data.baselineCO2, sgp_data.baselineTVOC);
+                }
+                setBaselineCounter = 0;
+            }
+
+            // According to datasheet, SGP30 MeasureAirQuality need to be called at about 1s
+            // interval in order to work at maximum accuracy
+            if (SGP30_SUCCESS != sgp30_MeasureAirQuality(&sgp_data)) {
+                rFlag &= ~(RFLAG_CO2 | RFLAG_TVOC);
+#if (DEBUG_CONSOLE_EN > 0u)
+                debug_console("Error! spg30_MeasureAirQuality failed!\n\r");
 #endif
             } else {
-                rFlag |= (RFLAG_BASE_CO2 | RFLAG_BASE_TVOC);
+                rFlag |= (RFLAG_CO2 | RFLAG_TVOC);
 #if (DEBUG_CONSOLE_EN > 0u)
-                debug_console("spg30_GetBaseline success!\n\r");
-                snprintf(debug_msg, DBUG_MSG_LEN, "baselineCO2:%uppm, baselineTVOC:%uppb\n\r",
-                         sgp_data.baselineCO2, sgp_data.baselineTVOC);
+                debug_console("spg30_MeasureAirQuality success!\n\r");
+                snprintf(debug_msg, DBUG_MSG_LEN, "CO2eq:%uppm\n\r", sgp_data.CO2);
+                debug_console(debug_msg);
+                snprintf(debug_msg, DBUG_MSG_LEN, "TVOC:%uppb\n\r", sgp_data.TVOC);
                 debug_console(debug_msg);
 #endif
             }
-            setBaselineCounter = 0;
-            sgp30_SetBaseline(sgp_data.baselineCO2, sgp_data.baselineTVOC);
-        }
-
-        // According to datasheet, SGP30 MeasureAirQuality need to be called at about 1s interval in
-        // order to work at maximum accuracy
-        if (SGP30_SUCCESS != sgp30_MeasureAirQuality(&sgp_data)) {
-            rFlag &= ~(RFLAG_CO2 | RFLAG_TVOC);
-#if (DEBUG_CONSOLE_EN > 0u)
-            debug_console("Error! spg30_MeasureAirQuality failed!\n\r");
-#endif
         } else {
-            rFlag |= (RFLAG_CO2 | RFLAG_TVOC);
 #if (DEBUG_CONSOLE_EN > 0u)
-            debug_console("spg30_MeasureAirQuality success!\n\r");
-            snprintf(debug_msg, DBUG_MSG_LEN, "CO2eq:%uppm\n\r", sgp_data.CO2);
-            debug_console(debug_msg);
-            snprintf(debug_msg, DBUG_MSG_LEN, "TVOC:%uppb\n\r", sgp_data.TVOC);
-            debug_console(debug_msg);
+            debug_console("Error! SGP30 is offline!\n\r");
 #endif
         }
 
@@ -198,7 +205,7 @@ void DMA1_Channel5_IRQHandler(void) {
  */
 void USART1_IRQHandler(void) {
     uint32_t status = USART1->SR;
-    uint8_t  data;
+    uint8_t  data __attribute__((unused));
     /* Check for IDLE line interrupt */
     if (status & USART_SR_IDLE) {
 #if (DEBUG_CONSOLE_EN > 0u)
@@ -252,7 +259,7 @@ void DMA1_Channel6_IRQHandler(void) {
  */
 void USART2_IRQHandler(void) {
     uint32_t status = USART2->SR;
-    uint8_t  data;
+    uint8_t  data __attribute__((unused));
     /* Check for IDLE line interrupt */
     if (status & USART_SR_IDLE) {
 #if (DEBUG_CONSOLE_EN > 0u)
@@ -266,11 +273,14 @@ void USART2_IRQHandler(void) {
 
 /* Private functions */
 /**
- * \brief Send debug information
- * \param[in] message - Debug message
+ * \brief Initialize on-board LED2
  * \author siyuan xu, e2101066@edu.vamk.fi, Mar.2023
  */
-void debug_console(const char *message) { USART2_send_string(message); }
+static inline void LED2_init(void) {
+    RCC->AHBENR  |= 1;      // GPIOA ABH bus clock ON. p154
+    GPIOA->MODER |= 0x400;  // GPIOA pin 5 to output. p184
+    GPIOA->ODR   ^= 0x20;
+}
 
 /**
  * \brief Local implementation for sending Modbus RTU data
