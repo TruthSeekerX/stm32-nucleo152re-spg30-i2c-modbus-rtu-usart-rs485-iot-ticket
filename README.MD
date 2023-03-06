@@ -113,9 +113,9 @@ Memories are used to store the data and program code. And there are different ty
 ## Modbus RTU acceptable commands
 
 * 5 4 0 1 0 1 142 97  |   CO2 (Contineously measuring)
-* 5 4 0 2 0 1 142 145 |   TVCO (Contineously measuríng)
+* 5 4 0 2 0 1 142 145 |   TVOC (Contineously measuríng)
 * 5 4 0 3 0 1 78 192  |   BASE_CO2 (MEASURE ON REQUEST)
-* 5 4 0 4 0 1 143 113 |   BASE_TVCO (MEASURE ON REQUEST)
+* 5 4 0 4 0 1 143 113 |   BASE_TVOC (MEASURE ON REQUEST)
 
 ## Modbus RTU error commands
 
