@@ -3,8 +3,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define DEBUG_CONSOLE_EN 1u
-
 /* Modbus RTU client parameters*/
 #define MODBUS_RTU_SLAVE_ADDR_THIS       (uint8_t)0x05
 #define MODBUS_REGISTER_SIZE             20

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "modbus_rtu.h"
+#include "utils.h"
 #include "crc.h"
 
 /**
