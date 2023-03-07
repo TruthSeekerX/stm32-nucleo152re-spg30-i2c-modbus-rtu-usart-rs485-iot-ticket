@@ -193,7 +193,17 @@ void DMA1_Channel5_IRQHandler(void) {
 #endif
         u1tcFlag   = TRUE;
         DMA1->IFCR |= DMA_IFCR_CTCIF5; /*!< Channel 5 Transfer Complete clear */
-        modbusRtu_RunRequest(usart1_rx_dma_buffer, (void *)(&sgp_data));
+        if (MODBUS_RTU_SUCCESS !=
+            modbusRtu_AddressValidation(usart1_rx_dma_buffer[SLAVE_ADDRESS])) {
+#if (DEBUG_CONSOLE_EN > 0u)
+            debug_console("Not my address, discard the frame!\r\n");
+#endif
+        } else {
+            modbusRtu_RunRequest(usart1_rx_dma_buffer, (void *)(&sgp_data));
+#if (DEBUG_CONSOLE_EN > 0u)
+            debug_console("Not my address, discard the frame!\r\n");
+#endif
+        }
         USART1_RX_Buffer_Reset();
         DMA1_Channel15_Reload();
     }
@@ -222,8 +232,8 @@ void USART1_IRQHandler(void) {
                 "Tranmition error!"
                 "IDLE line detected, but transmition complete flag is FALSE!\n\r");
 #endif
-            DMA1_Channel15_Reload();
             USART1_RX_Buffer_Reset();
+            DMA1_Channel15_Reload();
         }
     }
 }
