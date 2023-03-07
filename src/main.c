@@ -47,7 +47,7 @@ sgp30_t sgp_data;
 
 /* Private function prototypes */
 void               modbusRtu_SendData(const uint8_t *const data, const size_t data_length);
-MODBUS_RTU_ERR     modbusRtu_ReadInputRegister(const uint8_t *const modbus_rtu_frame, void *data,
+MODBUS_RTU_ERR     modbusRtu_TryReadInputRegister(const uint8_t *const modbus_rtu_frame, void *data,
                                                uint8_t *reply_data, uint8_t *reply_data_len);
 static inline void LED2_init(void);
 /**
@@ -308,7 +308,7 @@ void modbusRtu_SendData(const uint8_t *const data, const size_t data_length) {
  * \param[in] data - The address of the data to be sent, sgp30_t
  * \author siyuan xu, e2101066@edu.vamk.fi, Mar.2023
  */
-MODBUS_RTU_ERR modbusRtu_ReadInputRegister(const uint8_t *const modbus_rtu_frame, void *data,
+MODBUS_RTU_ERR modbusRtu_TryReadInputRegister(const uint8_t *const modbus_rtu_frame, void *data,
                                            uint8_t *reply_data, uint8_t *reply_data_len) {
     sgp30_t *sgp30_data    = (sgp30_t *)data;
     uint16_t register_addr = ((uint16_t)modbus_rtu_frame[START_ADDRESS_HI] << 8) |
