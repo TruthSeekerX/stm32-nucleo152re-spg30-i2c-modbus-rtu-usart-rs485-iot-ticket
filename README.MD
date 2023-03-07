@@ -3,7 +3,7 @@ This is a project for the third-year course IITS2107-3004 Embedded Systems Desig
 
 ## Objectives
 
-* PCB Design and manufacturering
+* PCB Design and manufacturing
 * Communication protocol I2C with SGP30 air quality sensor
 * Communication protocol RS485
 * Communication protocol MODBUS RTU
