@@ -201,7 +201,7 @@ void DMA1_Channel5_IRQHandler(void) {
         } else {
             modbusRtu_RunRequest(usart1_rx_dma_buffer, (void *)(&sgp_data));
 #if (DEBUG_CONSOLE_EN > 0u)
-            debug_console("Not my address, discard the frame!\r\n");
+            debug_console("My address, Run Modbus request!\r\n");
 #endif
         }
         USART1_RX_Buffer_Reset();
