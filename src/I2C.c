@@ -69,7 +69,7 @@ static inline void I2C_DisableACK(void) {
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
 void I2C_StartTransmission(const uint8_t address) {
-    volatile int tmp;
+    volatile int tmp __attribute__((unused));
 
     I2C_Start();
     I2C1->DR = address << 1;  // transmit slave address
@@ -120,7 +120,7 @@ void I2C_WriteData(const size_t data_length, const uint8_t *data) {
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
 void I2C_Read(const uint8_t address, const size_t data_length, uint8_t *data) {
-    volatile int tmp;
+    volatile int tmp __attribute__((unused));
 
     I2C1->CR1 |= 0x100;  // generate repeated start p.694
     while (!(I2C1->SR1 & 1)) {

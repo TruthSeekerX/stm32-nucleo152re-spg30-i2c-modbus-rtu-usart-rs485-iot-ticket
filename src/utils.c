@@ -5,6 +5,7 @@
  *      Author: Siyuan Xu
  */
 #include "stm32l1xx.h"
+#include "usart_config.h"
 
 void delay_us(const unsigned long delay) {
     unsigned long i = 0;
@@ -35,3 +36,10 @@ void delay_ms(const unsigned long delay) {
         i++;
     }
 }
+
+/**
+ * \brief Send debug information
+ * \param[in] message - Debug message
+ * \author siyuan xu, e2101066@edu.vamk.fi, Mar.2023
+ */
+void debug_console(const char *message) { USART2_send_string(message); }

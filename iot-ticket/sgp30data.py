@@ -31,13 +31,15 @@ def send_data_to_iot_ticket(v1,v2):
     nv.set_dataType("long")
     nv.set_unit("ppm")
     nv.set_value(v1) #needed for writing datanode
-    
+    nv.set_timestamp(int(round(time.time() * 1000)))
+
     nv1 = datanodesvalue()
     nv1.set_name("TVOC") #needed for writing datanode
     nv1.set_path("tvoc")
     nv1.set_dataType("long")
     nv1.set_unit("ppb")
     nv1.set_value(v2) #needed for writing datanode
+    nv1.set_timestamp(int(round(time.time() * 1000)))
     listofvalues.append(nv)
     listofvalues.append(nv1)
     print(c.writedata(deviceId, *listofvalues)) # another way to make this would be c.writedata(deviceId, nv, nv1)

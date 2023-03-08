@@ -139,14 +139,19 @@ SGP30ERR spg30_GetBaseLine(sgp30_t *const sgp_data) {
 
 /**
  * \brief Set CO2eq and total VOC(TVOC) baseline for compensation algorithm.
- * \param[in] baseline_eco2 - The baseline value of CO2eq, ppm.
- * \param[in] baseline_tvoc - The baseline value of TVOC, ppb.
- * \return none
+ * \param[in] baseline_eco2 - The baseline value of CO2eq, ppm. max 60000
+ * \param[in] baseline_tvoc - The baseline value of TVOC, ppb. max 60000
+ * \return SGP30_SUCCESS, SGP30_BAD_BASELINE
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  * \details For better accuracy, returned data from GetBaseline should be stored and SetBaseline
  * every hour.
  */
-void sgp30_SetBaseline(const uint16_t baseline_eco2, const uint16_t baseline_tvoc) {
+SGP30ERR sgp30_SetBaseline(const uint16_t baseline_eco2, const uint16_t baseline_tvoc) {
+    // validate input
+    if(baseline_eco2 > 60000 || baseline_tvoc > 60000){
+        return SGP30_BAD_BASELINE;
+    }
+
     uint8_t binary_data[6];
     binary_data[0] = baseline_eco2 >> 8;
     binary_data[1] = baseline_eco2 & 0x0f;
@@ -160,13 +165,15 @@ void sgp30_SetBaseline(const uint16_t baseline_eco2, const uint16_t baseline_tvo
     I2C_WriteData(6, binary_data);
     delay_ms(10);
     I2C_Stop();
+
+    return SGP30_SUCCESS;
 }
 
 /**
  * \brief Set humidity compensation for the air quality signals (CO2eq and TVOC) and sensor raw
  * signals (H2-signal and Ethanol_signal).
  * \param[in] humidity - The absolute humidity of the environment.
- * \return none
+ * \return SGP30_SUCCESS, SGP30_BAD_HUMIDITY
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  * \details The 2 data bytes represent humidity values as a fixed-point 8.8bit number with a minimum
  * value of 0x0001 (=1/256 g/m3) and a maximum value of 0xFFFF (255 g/m3 + 255/256 g/m3). For
@@ -178,10 +185,16 @@ void sgp30_SetBaseline(const uint16_t baseline_eco2, const uint16_t baseline_tvo
  * humidity value is sent. Sending a humidity value of 0x0000 can therefore be used to turn off the
  * humidity compensation.
  */
-void sgp30_SetHumidity(const uint16_t humidity) {
-    uint8_t binary_data[3];
-    binary_data[0] = humidity >> 8;
-    binary_data[1] = humidity & 0x0f;
+SGP30ERR  spg30_SetAbsoluteHumidity(const double humidity) {
+    // validate input
+    if(humidity > (255 + 255.0/256)){
+        return SGP30_BAD_HUMIDITY;
+    }
+    uint8_t  binary_data[3];
+    uint16_t m_humidity = humidity * 100;  // maximum humidity value is 255+255/256. In this case
+                                           // uint16_t can contain the converion.
+    binary_data[0] = m_humidity >> 8;
+    binary_data[1] = (uint8_t)((m_humidity & 0x0f) * 256 / 100);  // ex.
     binary_data[2] = CRC8(binary_data, 2, SGP30_CRC8_POLY, SGP30_CRC8_INIT, SGP30_CRC8_XOR);
 
     I2C_StartTransmission(SGP30_ADDR);
@@ -189,6 +202,7 @@ void sgp30_SetHumidity(const uint16_t humidity) {
     I2C_WriteData(3, binary_data);
     delay_ms(10);
     I2C_Stop();
+    return SGP30_SUCCESS;
 }
 
 /**

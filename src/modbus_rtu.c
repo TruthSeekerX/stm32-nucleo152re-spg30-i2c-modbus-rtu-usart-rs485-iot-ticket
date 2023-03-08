@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "modbus_rtu.h"
+#include "utils.h"
 #include "crc.h"
 
 /**
@@ -19,7 +20,6 @@ modbus_rtu_t modbus_rtu_create(void) {
  */
 void modbusRtu_RunRequest(const uint8_t *const modbus_rtu_frame, void *data) {
     MODBUS_RTU_ERR err;
-    uint8_t        functionCode;
     uint8_t        reply_data[8];
     uint8_t        reply_data_len = 0;
 
@@ -35,8 +35,7 @@ void modbusRtu_RunRequest(const uint8_t *const modbus_rtu_frame, void *data) {
         debug_console("CRC SUCCESS!\n\r");
 #endif
         // Validate Function Code
-        functionCode = modbus_rtu_frame[FUNCTION_CODE];
-        err          = modbusRtu_FunctionCodeValidation(functionCode);
+        err          = modbusRtu_FunctionCodeValidation(modbus_rtu_frame[FUNCTION_CODE]);
         if (MODBUS_RTU_SUCCESS != err) {
 #if (DEBUG_CONSOLE_EN > 0u)
             debug_console("BAD FUNCTION CODE!\n\r");
@@ -59,7 +58,7 @@ void modbusRtu_RunRequest(const uint8_t *const modbus_rtu_frame, void *data) {
                     break;
                 case READ_AI:
                     // TBD
-                    err = modbusRtu_ReadInputRegister(modbus_rtu_frame, data, reply_data,
+                    err = modbusRtu_TryReadInputRegister(modbus_rtu_frame, data, reply_data,
                                                       &reply_data_len);
                     break;
                 case WRITE_ONE_DO:
