@@ -16,6 +16,7 @@ modbus_rtu_t modbus_rtu_create(void) {
 /**
  * \brief Run a modbus rtu request
  * \param[in] modbus_rtu_frame - Address + PDU + CRC, PDU = Function code + Data
+ * \param[in] data - The address of the coils and registers
  * \author siyuan xu, e2101066@edu.vamk.fi, Jan.2023
  */
 void modbusRtu_RunRequest(const uint8_t *const modbus_rtu_frame, void *data) {
@@ -57,7 +58,6 @@ void modbusRtu_RunRequest(const uint8_t *const modbus_rtu_frame, void *data) {
                     // TBD
                     break;
                 case READ_AI:
-                    // TBD
                     err = modbusRtu_TryReadInputRegister(modbus_rtu_frame, data, reply_data,
                                                       &reply_data_len);
                     break;
