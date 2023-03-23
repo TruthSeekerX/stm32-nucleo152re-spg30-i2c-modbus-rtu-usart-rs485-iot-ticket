@@ -132,6 +132,7 @@ void I2C_Read(const uint8_t address, const size_t data_length, uint8_t *data) {
     tmp       = I2C1->SR2;   // Reading I2C_SR2 after reading I2C_SR1 clears the ADDR flag p691
     I2C1->CR1 |= (1 << 10);  // Enable acknowledge p.683
 
+    // TBD - there is a bug that I2C_STOP() and I2C_DisableACK() should be sent at second last byte of the data, because it after issued I2C_DisableACK() it would continue send current one byte
     for (size_t i = 0; i < data_length; i++)  // read data from chip
     {
         while (!(I2C1->SR1 & 0x40)) {
