@@ -1,7 +1,7 @@
 Standard: Cpp11
 BasedOnStyle: Google
 IndentWidth: 4
-# Language: C
+Language: Cpp
 ColumnLimit: 100
 AccessModifierOffset: -4
 NamespaceIndentation: All
@@ -33,4 +33,6 @@ AlignConsecutiveBitFields: Consecutive
 AlignConsecutiveDeclarations: Consecutive
 AlignOperands: Align
 AlignEscapedNewlines: Left
-# AlignTrailingComments: Always
+# AlignTrailingComments: true
+  # Kind: Always
+  # OverEmptyLines: 2

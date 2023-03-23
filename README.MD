@@ -12,7 +12,7 @@ This is a project for the third-year course IITS2107-3004 Embedded Systems Desig
 * Wapice IoT-Ticket
 * RTFM - Read the fine manual/datasheet
 
-![Block diagram](./docs/images/block-diagram.png)`<br>`
+![Block diagram](./docs/images/block-diagram.png) `<br>`
 
 ## Equipment, Tools and Technology
 
@@ -77,7 +77,7 @@ Memories are used to store the data and program code. And there are different ty
 
 ## STM32 - Nuleol152re
 
-![Nucleo-l152re](./docs/images/STMicroelectronics-NUCLEO-L152RE.jpg "Nucleo-l152re development board")`<br>`
+![Nucleo-l152re](./docs/images/STMicroelectronics-NUCLEO-L152RE.jpg "Nucleo-l152re development board") `<br>`
 
 **STM32** is a family of 32-bit microcontrollers by STMicroelectronics. These MCUs are based on the ARM Cortx-M processor architecture. The STM32 family includes a wide range of devices with varying features and capabilities, including different levels of performance, memory sizes, and peripherals. They are also available in different package types, including surface-mount and through-hole packages Some of the key features of the STM32 family include:
 
@@ -104,9 +104,9 @@ Memories are used to store the data and program code. And there are different ty
 * On-board debugger and programmer ST-LINK/V2-1
 * Direct Memory Access (DMA)
 
-![Nucleo-l152re block diagram](./docs/images/nucleol152re_um_hardware-block-diagram.jpg "Nucleo-l152re block diagram")`<br>`
+![Nucleo-l152re block diagram](./docs/images/nucleol152re_um_hardware-block-diagram.jpg "Nucleo-l152re block diagram") `<br>`
 ![Nucleo-l152re top layout](./docs/images/nucleol152re_um_top-layout.jpg "Nucleo-l152re top layout")
-![Nucleo-l152re bottom layout](./docs/images/nucleol152re_um_bottom-layout.jpg "Nucleo-l152re bottom layout")`<br>`
+![Nucleo-l152re bottom layout](./docs/images/nucleol152re_um_bottom-layout.jpg "Nucleo-l152re bottom layout") `<br>`
 
 ## TESTING CASES
 
